@@ -1,0 +1,44 @@
+server:
+  port: 8087
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      circuitBreakerService:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+
+  retry:
+    instances:
+      retryService:
+        maxAttempts: 3 # Number of retry attempts
+        waitDuration: 10s # Wait duration between retries
+      #  enableExponentialBackoff: true # Optional for backoff strategy
+      #  exponentialBackoffMultiplier: 2 # Multiplier for backoff (optional)
+
+  ratelimiter:
+    instances:
+      rateLimiterService:
+        registerHealthIndicator: false
+        limitForPeriod: 10 # allow 10 request only in 10 seconds
+        limitRefreshPeriod: 10s
+        timeoutDuration: 3s
